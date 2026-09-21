@@ -30,6 +30,7 @@ const input = document.getElementById("city-input");
 const progressBarEl = document.getElementById("progress-bar");
 const statusEl = document.getElementById("status");
 const resultEl = document.getElementById("result");
+const cityImageEl = document.getElementById("city-image");
 const locationEl = document.getElementById("location");
 const temperatureEl = document.getElementById("temperature");
 const conditionEl = document.getElementById("condition");
@@ -48,6 +49,8 @@ async function fetchWeather(city) {
   setStatus("");
   progressBarEl.classList.remove("hidden");
   resultEl.classList.add("hidden");
+  cityImageEl.classList.add("hidden");
+  cityImageEl.src = "";
 
   try {
     const geoRes = await fetch(
@@ -74,6 +77,7 @@ async function fetchWeather(city) {
 
     const locationParts = [name, admin1, country].filter(Boolean);
     locationEl.textContent = locationParts.join(", ");
+    await loadCityImage(name);
     temperatureEl.textContent = `${Math.round(current.temperature_2m)}°C`;
     conditionEl.textContent =
       WEATHER_CODES[current.weather_code] || "Unknown conditions";
@@ -93,4 +97,22 @@ async function fetchWeather(city) {
 function setStatus(message, isError = false) {
   statusEl.textContent = message;
   statusEl.classList.toggle("error", isError);
+}
+
+async function loadCityImage(name) {
+  try {
+    const res = await fetch(
+      `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(name)}`
+    );
+    if (!res.ok) return;
+    const data = await res.json();
+    const imageUrl = data.thumbnail && data.thumbnail.source;
+    if (!imageUrl) return;
+
+    cityImageEl.src = imageUrl;
+    cityImageEl.alt = name;
+    cityImageEl.classList.remove("hidden");
+  } catch {
+    // No image is fine, the layout works without one.
+  }
 }
