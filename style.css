@@ -1,9 +1,54 @@
 :root {
-  --bg: #4a90d9;
+  --bg-top: #4a90d9;
+  --bg-bottom: #8ec5fc;
   --card-bg: #ffffff;
   --text: #1c1c1c;
   --muted: #6b7280;
   --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --border: #d1d5db;
+  --border-soft: #e5e7eb;
+  --hover-bg: #eff6ff;
+  --error: #dc2626;
+  --overlay-top: #cfe4fb;
+  --overlay-bottom: #eef6ff;
+  --header-text: rgba(255, 255, 255, 0.95);
+  --toggle-bg: rgba(255, 255, 255, 0.22);
+  --toggle-bg-hover: rgba(255, 255, 255, 0.36);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg-top: #0f1a2e;
+    --bg-bottom: #1c2b47;
+    --card-bg: #161f30;
+    --text: #eef1f7;
+    --muted: #9aa4b8;
+    --accent: #6ea1ff;
+    --accent-hover: #8fb6ff;
+    --border: #2b3a52;
+    --border-soft: #24324a;
+    --hover-bg: #1f2c44;
+    --error: #ff8a8a;
+    --overlay-top: #16233a;
+    --overlay-bottom: #0b1220;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg-top: #0f1a2e;
+  --bg-bottom: #1c2b47;
+  --card-bg: #161f30;
+  --text: #eef1f7;
+  --muted: #9aa4b8;
+  --accent: #6ea1ff;
+  --accent-hover: #8fb6ff;
+  --border: #2b3a52;
+  --border-soft: #24324a;
+  --hover-bg: #1f2c44;
+  --error: #ff8a8a;
+  --overlay-top: #16233a;
+  --overlay-bottom: #0b1220;
 }
 
 * {
@@ -14,27 +59,67 @@ body {
   margin: 0;
   min-height: 100vh;
   display: flex;
+  flex-direction: column;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
+  background: linear-gradient(135deg, var(--bg-top), var(--bg-bottom));
+  transition: background 0.3s ease;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px clamp(16px, 5vw, 48px);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.app-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--header-text);
+}
+
+.theme-toggle {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: none;
+  background: var(--toggle-bg);
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
   align-items: center;
   justify-content: center;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-  background: linear-gradient(135deg, #4a90d9, #8ec5fc);
-  padding: 20px;
+  transition: background 0.2s ease;
+}
+
+.theme-toggle:hover {
+  background: var(--toggle-bg-hover);
+}
+
+.page-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px clamp(16px, 5vw, 48px) 48px;
 }
 
 .card {
   width: 100%;
-  max-width: 380px;
+  max-width: 640px;
   background: var(--card-bg);
-  border-radius: 16px;
-  padding: 28px;
+  border-radius: 20px;
+  padding: 32px clamp(20px, 4vw, 40px);
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-}
-
-h1 {
-  margin: 0 0 20px;
-  font-size: 1.5rem;
   color: var(--text);
-  text-align: center;
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
 .search {
@@ -52,9 +137,11 @@ h1 {
 #city-input {
   width: 100%;
   padding: 10px 12px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border);
   border-radius: 8px;
   font-size: 1rem;
+  background: var(--card-bg);
+  color: var(--text);
 }
 
 #city-input:focus {
@@ -72,7 +159,7 @@ h1 {
   padding: 4px;
   list-style: none;
   background: var(--card-bg);
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border);
   border-radius: 8px;
   max-height: 240px;
   overflow-y: auto;
@@ -91,7 +178,7 @@ h1 {
 
 .suggestion-item:hover,
 .suggestion-item.active {
-  background: #eff6ff;
+  background: var(--hover-bg);
 }
 
 .suggestion-main {
@@ -126,7 +213,7 @@ h1 {
 }
 
 .search button:hover {
-  background: #1d4ed8;
+  background: var(--accent-hover);
 }
 
 .status {
@@ -137,7 +224,7 @@ h1 {
 }
 
 .status.error {
-  color: #dc2626;
+  color: var(--error);
 }
 
 .result {
@@ -151,7 +238,7 @@ h1 {
 
 .city-image {
   width: 100%;
-  height: 160px;
+  height: 220px;
   object-fit: cover;
   border-radius: 12px;
   margin-bottom: 12px;
@@ -162,13 +249,13 @@ h1 {
 }
 
 .location {
-  font-size: 1.2rem;
+  font-size: 1.4rem;
   font-weight: 600;
   margin: 0 0 4px;
 }
 
 .temperature {
-  font-size: 3rem;
+  font-size: 3.75rem;
   font-weight: 700;
   margin: 0;
   color: var(--accent);
@@ -177,13 +264,13 @@ h1 {
 .condition {
   margin: 4px 0 20px;
   color: var(--muted);
-  font-size: 1.05rem;
+  font-size: 1.15rem;
 }
 
 .details {
   display: flex;
   justify-content: space-between;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--border-soft);
   padding-top: 16px;
 }
 
@@ -205,10 +292,35 @@ h1 {
 
 .radar-map {
   width: 100%;
-  height: 220px;
-  border-radius: 12px;
+  height: 360px;
+  border-radius: 14px;
   overflow: hidden;
-  background: #e5e7eb;
+  background: var(--border-soft);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.radar-map .leaflet-control-zoom {
+  border: none !important;
+  border-radius: 10px !important;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18) !important;
+}
+
+.radar-map .leaflet-control-zoom a {
+  background: var(--card-bg) !important;
+  color: var(--accent) !important;
+  border: none !important;
+}
+
+.radar-map .leaflet-control-zoom a:hover {
+  background: var(--hover-bg) !important;
+}
+
+.radar-map .leaflet-control-attribution {
+  background: rgba(255, 255, 255, 0.75) !important;
+  color: #4b5563 !important;
+  font-size: 0.65rem !important;
+  border-radius: 6px 0 0 0;
 }
 
 .cloud-overlay {
@@ -216,10 +328,10 @@ h1 {
   inset: 0;
   z-index: 1000;
   overflow: hidden;
-  background: linear-gradient(160deg, #cfe4fb, #eef6ff);
+  background: linear-gradient(160deg, var(--overlay-top), var(--overlay-bottom));
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.3s ease-out;
+  transition: opacity 0.3s ease-out, background 0.3s ease;
 }
 
 .cloud-overlay.hidden {

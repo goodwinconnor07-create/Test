@@ -25,6 +25,33 @@ const WEATHER_CODES = {
   99: "Thunderstorm with heavy hail",
 };
 
+const WEATHER_ICONS = {
+  0: "☀️",
+  1: "🌤️",
+  2: "⛅",
+  3: "☁️",
+  45: "🌫️",
+  48: "🌫️",
+  51: "🌦️",
+  53: "🌦️",
+  55: "🌧️",
+  61: "🌧️",
+  63: "🌧️",
+  65: "🌧️",
+  71: "🌨️",
+  73: "🌨️",
+  75: "❄️",
+  77: "❄️",
+  80: "🌦️",
+  81: "🌧️",
+  82: "⛈️",
+  85: "🌨️",
+  86: "❄️",
+  95: "⛈️",
+  96: "⛈️",
+  99: "⛈️",
+};
+
 const form = document.getElementById("search-form");
 const input = document.getElementById("city-input");
 const citySearchEl = document.getElementById("city-search");
@@ -39,6 +66,36 @@ const conditionEl = document.getElementById("condition");
 const feelsLikeEl = document.getElementById("feels-like");
 const humidityEl = document.getElementById("humidity");
 const windEl = document.getElementById("wind");
+const themeToggleBtn = document.getElementById("theme-toggle");
+
+const THEME_STORAGE_KEY = "simpleweather-theme";
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute("data-theme", theme);
+  themeToggleBtn.textContent = theme === "dark" ? "☀️" : "🌙";
+  refreshRadarBaseLayer();
+}
+
+function initTheme() {
+  let stored = null;
+  try {
+    stored = localStorage.getItem(THEME_STORAGE_KEY);
+  } catch {
+    // Storage can be unavailable (private browsing, locked-down settings); fall back below.
+  }
+  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  applyTheme(stored || (prefersDark ? "dark" : "light"));
+}
+
+themeToggleBtn.addEventListener("click", () => {
+  const next = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+  try {
+    localStorage.setItem(THEME_STORAGE_KEY, next);
+  } catch {
+    // If storage isn't available, the theme just won't persist across reloads.
+  }
+  applyTheme(next);
+});
 
 let suggestionResults = [];
 let activeSuggestionIndex = -1;
@@ -249,8 +306,9 @@ async function loadWeatherForLocation(location) {
     locationEl.textContent = locationParts.join(", ");
     await loadCityImage(name, admin1);
     temperatureEl.textContent = `${Math.round(current.temperature_2m)}°C`;
-    conditionEl.textContent =
-      WEATHER_CODES[current.weather_code] || "Unknown conditions";
+    const conditionText = WEATHER_CODES[current.weather_code] || "Unknown conditions";
+    const conditionIcon = WEATHER_ICONS[current.weather_code] || "🌡️";
+    conditionEl.textContent = `${conditionIcon} ${conditionText}`;
     feelsLikeEl.textContent = `${Math.round(current.apparent_temperature)}°C`;
     humidityEl.textContent = `${current.relative_humidity_2m}%`;
     windEl.textContent = `${Math.round(current.wind_speed_10m)} km/h`;
@@ -315,27 +373,48 @@ async function fetchWikipediaThumbnail(title) {
 
 let radarMap = null;
 let radarMarker = null;
+let radarBaseLayer = null;
+let radarLabelLayer = null;
 let radarTileLayer = null;
 let radarFrameCache = null;
 const RADAR_FRAME_TTL_MS = 5 * 60 * 1000;
 
+function getBaseTileUrls() {
+  const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+  const variant = isDark ? "Dark_Gray" : "Light_Gray";
+  return {
+    base: `https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_${variant}_Base/MapServer/tile/{z}/{y}/{x}`,
+    labels: `https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_${variant}_Reference/MapServer/tile/{z}/{y}/{x}`,
+  };
+}
+
+function refreshRadarBaseLayer() {
+  if (!radarBaseLayer || !radarLabelLayer) return;
+  const urls = getBaseTileUrls();
+  radarBaseLayer.setUrl(urls.base);
+  radarLabelLayer.setUrl(urls.labels);
+}
+
 async function updateRadar(lat, lon) {
   if (!radarMap) {
     radarMap = L.map("radar-map").setView([lat, lon], 7);
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 12,
-      attribution: "&copy; OpenStreetMap contributors",
+    const urls = getBaseTileUrls();
+    radarBaseLayer = L.tileLayer(urls.base, {
+      maxZoom: 14,
+      attribution: "Tiles &copy; Esri",
     }).addTo(radarMap);
+    radarLabelLayer = L.tileLayer(urls.labels, { maxZoom: 14 }).addTo(radarMap);
   } else {
     radarMap.setView([lat, lon], 7);
   }
 
   if (radarMarker) radarMap.removeLayer(radarMarker);
   radarMarker = L.circleMarker([lat, lon], {
-    radius: 6,
-    color: "#2563eb",
+    radius: 7,
+    weight: 2,
+    color: "#ffffff",
     fillColor: "#2563eb",
-    fillOpacity: 0.9,
+    fillOpacity: 1,
   }).addTo(radarMap);
 
   requestAnimationFrame(() => radarMap.invalidateSize());
@@ -368,3 +447,5 @@ async function getRadarTileUrlTemplate() {
   radarFrameCache = { template, fetchedAt: Date.now() };
   return template;
 }
+
+initTheme();
