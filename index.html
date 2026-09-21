@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Weather</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="card">
+    <h1>Weather</h1>
+
+    <form id="search-form" class="search">
+      <input
+        id="city-input"
+        type="text"
+        placeholder="Enter a city name..."
+        autocomplete="off"
+        required
+      />
+      <button type="submit">Search</button>
+    </form>
+
+    <div id="status" class="status"></div>
+
+    <section id="result" class="result hidden">
+      <p id="location" class="location"></p>
+      <p id="temperature" class="temperature"></p>
+      <p id="condition" class="condition"></p>
+      <div class="details">
+        <div>
+          <span class="label">Feels like</span>
+          <span id="feels-like"></span>
+        </div>
+        <div>
+          <span class="label">Humidity</span>
+          <span id="humidity"></span>
+        </div>
+        <div>
+          <span class="label">Wind</span>
+          <span id="wind"></span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
