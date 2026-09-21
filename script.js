@@ -44,13 +44,20 @@ let suggestionResults = [];
 let activeSuggestionIndex = -1;
 let suggestionDebounce;
 let suggestionRequestToken = 0;
+let selectedLocation = null;
+let selectedLocationText = "";
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
   const city = input.value.trim();
   if (!city) return;
   hideSuggestions();
-  await fetchWeather(city);
+
+  if (selectedLocation && city === selectedLocationText) {
+    await loadWeatherForLocation(selectedLocation);
+  } else {
+    await fetchWeather(city);
+  }
 });
 
 input.addEventListener("input", () => {
@@ -62,7 +69,7 @@ input.addEventListener("input", () => {
     return;
   }
 
-  suggestionDebounce = setTimeout(() => fetchSuggestions(query), 300);
+  suggestionDebounce = setTimeout(() => fetchSuggestions(query), 120);
 });
 
 input.addEventListener("keydown", (e) => {
@@ -155,10 +162,15 @@ function hideSuggestions() {
   activeSuggestionIndex = -1;
 }
 
-async function selectSuggestion(result) {
-  input.value = result.name;
+function selectSuggestion(result) {
+  const displayText = [result.name, result.admin1, result.country]
+    .filter(Boolean)
+    .join(", ");
+  input.value = displayText;
+  selectedLocation = result;
+  selectedLocationText = displayText;
   hideSuggestions();
-  await loadWeatherForLocation(result);
+  input.focus();
 }
 
 async function fetchWeather(city) {
