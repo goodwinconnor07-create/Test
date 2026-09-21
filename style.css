@@ -104,6 +104,17 @@ h1 {
   color: var(--muted);
 }
 
+.suggestion-placeholder {
+  cursor: default;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
+.suggestion-placeholder:hover {
+  background: none;
+}
+
 .search button {
   padding: 10px 16px;
   border: none;

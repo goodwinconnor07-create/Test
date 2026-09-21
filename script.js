@@ -46,6 +46,7 @@ let suggestionRequestToken = 0;
 let suggestionRenderedToken = 0;
 let selectedLocation = null;
 let selectedLocationText = "";
+const suggestionCache = new Map();
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -102,6 +103,21 @@ document.addEventListener("click", (e) => {
 
 async function fetchSuggestions(query) {
   const token = ++suggestionRequestToken;
+  const cacheKey = query.toLowerCase();
+
+  const cached = suggestionCache.get(cacheKey);
+  if (cached) {
+    if (token < suggestionRenderedToken) return;
+    suggestionRenderedToken = token;
+    renderSuggestions(cached);
+    return;
+  }
+
+  // Nothing to show yet for this exact query; let the dropdown say so
+  // immediately rather than sitting empty while the request is in flight.
+  if (suggestionsEl.classList.contains("hidden")) {
+    renderSuggestionsPlaceholder();
+  }
 
   try {
     const res = await fetch(
@@ -112,11 +128,21 @@ async function fetchSuggestions(query) {
     if (!res.ok || token < suggestionRenderedToken) return;
     const data = await res.json();
     if (token < suggestionRenderedToken) return;
+    suggestionCache.set(cacheKey, data.results || []);
     suggestionRenderedToken = token;
     renderSuggestions(data.results || []);
   } catch {
     // A failed suggestion request is fine; the Search button still works.
   }
+}
+
+function renderSuggestionsPlaceholder() {
+  suggestionsEl.innerHTML = "";
+  const li = document.createElement("li");
+  li.className = "suggestion-item suggestion-placeholder";
+  li.textContent = "Searching...";
+  suggestionsEl.appendChild(li);
+  suggestionsEl.classList.remove("hidden");
 }
 
 function renderSuggestions(results) {
