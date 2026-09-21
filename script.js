@@ -257,6 +257,7 @@ async function loadWeatherForLocation(location) {
 
     setStatus("");
     resultEl.classList.remove("hidden");
+    updateRadar(latitude, longitude);
   } catch (err) {
     setStatus(err.message || "Something went wrong. Please try again.", true);
   } finally {
@@ -310,4 +311,60 @@ async function fetchWikipediaThumbnail(title) {
   } catch {
     return null;
   }
+}
+
+let radarMap = null;
+let radarMarker = null;
+let radarTileLayer = null;
+let radarFrameCache = null;
+const RADAR_FRAME_TTL_MS = 5 * 60 * 1000;
+
+async function updateRadar(lat, lon) {
+  if (!radarMap) {
+    radarMap = L.map("radar-map").setView([lat, lon], 7);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 12,
+      attribution: "&copy; OpenStreetMap contributors",
+    }).addTo(radarMap);
+  } else {
+    radarMap.setView([lat, lon], 7);
+  }
+
+  if (radarMarker) radarMap.removeLayer(radarMarker);
+  radarMarker = L.circleMarker([lat, lon], {
+    radius: 6,
+    color: "#2563eb",
+    fillColor: "#2563eb",
+    fillOpacity: 0.9,
+  }).addTo(radarMap);
+
+  requestAnimationFrame(() => radarMap.invalidateSize());
+
+  try {
+    const tileUrlTemplate = await getRadarTileUrlTemplate();
+    if (radarTileLayer) radarMap.removeLayer(radarTileLayer);
+    radarTileLayer = L.tileLayer(tileUrlTemplate, {
+      opacity: 0.65,
+      attribution: "Radar &copy; RainViewer",
+    }).addTo(radarMap);
+  } catch {
+    // The base map still works fine without the precipitation overlay.
+  }
+}
+
+async function getRadarTileUrlTemplate() {
+  if (radarFrameCache && Date.now() - radarFrameCache.fetchedAt < RADAR_FRAME_TTL_MS) {
+    return radarFrameCache.template;
+  }
+
+  const res = await fetch("https://api.rainviewer.com/public/weather-maps.json");
+  if (!res.ok) throw new Error("Radar data unavailable.");
+  const data = await res.json();
+  const frames = data.radar && data.radar.past;
+  if (!frames || frames.length === 0) throw new Error("No radar frames available.");
+
+  const latestFrame = frames[frames.length - 1];
+  const template = `${data.host}${latestFrame.path}/256/{z}/{x}/{y}/2/1_1.png`;
+  radarFrameCache = { template, fetchedAt: Date.now() };
+  return template;
 }

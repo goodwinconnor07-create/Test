@@ -198,6 +198,19 @@ h1 {
   color: var(--muted);
 }
 
+.radar-label {
+  margin: 20px 0 8px;
+  text-align: left;
+}
+
+.radar-map {
+  width: 100%;
+  height: 220px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #e5e7eb;
+}
+
 .cloud-overlay {
   position: fixed;
   inset: 0;

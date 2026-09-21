@@ -8,6 +8,13 @@
   <link rel="preconnect" href="https://api.open-meteo.com" crossorigin />
   <link rel="preconnect" href="https://en.wikipedia.org" crossorigin />
   <link rel="preconnect" href="https://thumb.wikimedia.org" />
+  <link rel="preconnect" href="https://api.rainviewer.com" crossorigin />
+  <link rel="preconnect" href="https://tilecache.rainviewer.com" />
+  <link rel="preconnect" href="https://tile.openstreetmap.org" />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"
+  />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -49,6 +56,9 @@
           <span id="wind"></span>
         </div>
       </div>
+
+      <p class="label radar-label">Precipitation radar</p>
+      <div id="radar-map" class="radar-map"></div>
     </section>
   </main>
 
@@ -62,6 +72,7 @@
     <div class="cloud" style="top: 78%; left: 35%; --sx: 0vw; --sy: 60vh; animation-delay: 0.12s;"></div>
   </div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
