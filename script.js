@@ -27,6 +27,7 @@ const WEATHER_CODES = {
 
 const form = document.getElementById("search-form");
 const input = document.getElementById("city-input");
+const progressBarEl = document.getElementById("progress-bar");
 const statusEl = document.getElementById("status");
 const resultEl = document.getElementById("result");
 const locationEl = document.getElementById("location");
@@ -44,7 +45,8 @@ form.addEventListener("submit", async (e) => {
 });
 
 async function fetchWeather(city) {
-  setStatus("Loading...");
+  setStatus("");
+  progressBarEl.classList.remove("hidden");
   resultEl.classList.add("hidden");
 
   try {
@@ -83,6 +85,8 @@ async function fetchWeather(city) {
     resultEl.classList.remove("hidden");
   } catch (err) {
     setStatus(err.message || "Something went wrong. Please try again.", true);
+  } finally {
+    progressBarEl.classList.add("hidden");
   }
 }
 
