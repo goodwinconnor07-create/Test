@@ -42,8 +42,8 @@ const windEl = document.getElementById("wind");
 
 let suggestionResults = [];
 let activeSuggestionIndex = -1;
-let suggestionDebounce;
 let suggestionRequestToken = 0;
+let suggestionRenderedToken = 0;
 let selectedLocation = null;
 let selectedLocationText = "";
 
@@ -62,14 +62,14 @@ form.addEventListener("submit", async (e) => {
 
 input.addEventListener("input", () => {
   const query = input.value.trim();
-  clearTimeout(suggestionDebounce);
 
   if (query.length < 2) {
+    suggestionRenderedToken = ++suggestionRequestToken;
     hideSuggestions();
     return;
   }
 
-  suggestionDebounce = setTimeout(() => fetchSuggestions(query), 120);
+  fetchSuggestions(query);
 });
 
 input.addEventListener("keydown", (e) => {
@@ -106,12 +106,15 @@ async function fetchSuggestions(query) {
     const res = await fetch(
       `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=8&language=en&format=json`
     );
-    if (!res.ok || token !== suggestionRequestToken) return;
+    // A response for an older keystroke arriving after a newer one is already
+    // showing would only replace good results with stale ones, so skip it.
+    if (!res.ok || token < suggestionRenderedToken) return;
     const data = await res.json();
-    if (token !== suggestionRequestToken) return;
+    if (token < suggestionRenderedToken) return;
+    suggestionRenderedToken = token;
     renderSuggestions(data.results || []);
   } catch {
-    // Suggestions are a convenience; the Search button still works without them.
+    // A failed suggestion request is fine; the Search button still works.
   }
 }
 
