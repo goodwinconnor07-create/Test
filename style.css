@@ -40,10 +40,17 @@ h1 {
 .search {
   display: flex;
   gap: 8px;
+  align-items: flex-start;
+}
+
+.city-search {
+  position: relative;
+  flex: 1;
+  min-width: 0;
 }
 
 #city-input {
-  flex: 1;
+  width: 100%;
   padding: 10px 12px;
   border: 1px solid #d1d5db;
   border-radius: 8px;
@@ -53,6 +60,48 @@ h1 {
 #city-input:focus {
   outline: none;
   border-color: var(--accent);
+}
+
+.suggestions {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 10;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  background: var(--card-bg);
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  max-height: 240px;
+  overflow-y: auto;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.14);
+}
+
+.suggestions.hidden {
+  display: none;
+}
+
+.suggestion-item {
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.suggestion-item:hover,
+.suggestion-item.active {
+  background: #eff6ff;
+}
+
+.suggestion-main {
+  font-size: 0.95rem;
+  color: var(--text);
+}
+
+.suggestion-sub {
+  font-size: 0.78rem;
+  color: var(--muted);
 }
 
 .search button {

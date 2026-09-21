@@ -11,13 +11,16 @@
     <h1>Weather</h1>
 
     <form id="search-form" class="search">
-      <input
-        id="city-input"
-        type="text"
-        placeholder="Enter a city name..."
-        autocomplete="off"
-        required
-      />
+      <div id="city-search" class="city-search">
+        <input
+          id="city-input"
+          type="text"
+          placeholder="Enter a city name..."
+          autocomplete="off"
+          required
+        />
+        <ul id="suggestions" class="suggestions hidden" role="listbox"></ul>
+      </div>
       <button type="submit">Search</button>
     </form>
 
