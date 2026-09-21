@@ -118,35 +118,6 @@ h1 {
   background: #1d4ed8;
 }
 
-.progress-bar {
-  margin-top: 16px;
-  height: 4px;
-  border-radius: 999px;
-  background: #e5e7eb;
-  overflow: hidden;
-}
-
-.progress-bar.hidden {
-  display: none;
-}
-
-.progress-bar-fill {
-  height: 100%;
-  width: 40%;
-  border-radius: 999px;
-  background: var(--accent);
-  animation: progress-slide 1.1s ease-in-out infinite;
-}
-
-@keyframes progress-slide {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(350%);
-  }
-}
-
 .status {
   margin-top: 12px;
   text-align: center;
@@ -214,4 +185,93 @@ h1 {
 .label {
   font-size: 0.8rem;
   color: var(--muted);
+}
+
+.cloud-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  overflow: hidden;
+  background: linear-gradient(160deg, #cfe4fb, #eef6ff);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease-out;
+}
+
+.cloud-overlay.hidden {
+  display: none;
+}
+
+.cloud-overlay.gathering {
+  opacity: 1;
+  pointer-events: auto;
+  transition: opacity 0.3s ease-out;
+}
+
+.cloud-overlay.scattering {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.45s ease-in;
+}
+
+.cloud {
+  position: absolute;
+  width: 220px;
+  height: 70px;
+  background: #ffffff;
+  border-radius: 100px;
+  opacity: 0;
+  transform: translate(var(--sx), var(--sy));
+}
+
+.cloud::before,
+.cloud::after {
+  content: "";
+  position: absolute;
+  background: #ffffff;
+  border-radius: 50%;
+}
+
+.cloud::before {
+  width: 110px;
+  height: 110px;
+  top: -55px;
+  left: 25px;
+}
+
+.cloud::after {
+  width: 85px;
+  height: 85px;
+  top: -40px;
+  right: 25px;
+}
+
+.cloud-overlay.gathering .cloud {
+  animation: cloud-gather 0.5s ease-out forwards;
+}
+
+.cloud-overlay.scattering .cloud {
+  animation: cloud-scatter 0.45s ease-in forwards;
+}
+
+@keyframes cloud-gather {
+  from {
+    transform: translate(var(--sx), var(--sy));
+    opacity: 0;
+  }
+  to {
+    transform: translate(0, 0);
+    opacity: 1;
+  }
+}
+
+@keyframes cloud-scatter {
+  from {
+    transform: translate(0, 0);
+    opacity: 1;
+  }
+  to {
+    transform: translate(calc(var(--sx) * -1.6), calc(var(--sy) * -1.6));
+    opacity: 0;
+  }
 }

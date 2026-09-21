@@ -29,7 +29,7 @@ const form = document.getElementById("search-form");
 const input = document.getElementById("city-input");
 const citySearchEl = document.getElementById("city-search");
 const suggestionsEl = document.getElementById("suggestions");
-const progressBarEl = document.getElementById("progress-bar");
+const cloudOverlayEl = document.getElementById("cloud-overlay");
 const statusEl = document.getElementById("status");
 const resultEl = document.getElementById("result");
 const cityImageEl = document.getElementById("city-image");
@@ -51,6 +51,7 @@ form.addEventListener("submit", async (e) => {
   e.preventDefault();
   const city = input.value.trim();
   if (!city) return;
+  suggestionRenderedToken = ++suggestionRequestToken;
   hideSuggestions();
 
   if (selectedLocation && city === selectedLocationText) {
@@ -178,7 +179,7 @@ function selectSuggestion(result) {
 
 async function fetchWeather(city) {
   setStatus("");
-  progressBarEl.classList.remove("hidden");
+  showCloudOverlay();
   resultEl.classList.add("hidden");
 
   try {
@@ -192,20 +193,20 @@ async function fetchWeather(city) {
 
     if (!geoData.results || geoData.results.length === 0) {
       setStatus(`No location found for "${city}".`, true);
-      progressBarEl.classList.add("hidden");
+      hideCloudOverlay();
       return;
     }
 
     await loadWeatherForLocation(geoData.results[0]);
   } catch (err) {
     setStatus(err.message || "Something went wrong. Please try again.", true);
-    progressBarEl.classList.add("hidden");
+    hideCloudOverlay();
   }
 }
 
 async function loadWeatherForLocation(location) {
   const { latitude, longitude, name, admin1, country } = location;
-  progressBarEl.classList.remove("hidden");
+  showCloudOverlay();
   resultEl.classList.add("hidden");
   cityImageEl.classList.add("hidden");
   cityImageEl.src = "";
@@ -233,13 +234,29 @@ async function loadWeatherForLocation(location) {
   } catch (err) {
     setStatus(err.message || "Something went wrong. Please try again.", true);
   } finally {
-    progressBarEl.classList.add("hidden");
+    hideCloudOverlay();
   }
 }
 
 function setStatus(message, isError = false) {
   statusEl.textContent = message;
   statusEl.classList.toggle("error", isError);
+}
+
+function showCloudOverlay() {
+  cloudOverlayEl.classList.remove("hidden", "scattering");
+  void cloudOverlayEl.offsetWidth;
+  cloudOverlayEl.classList.add("gathering");
+}
+
+function hideCloudOverlay() {
+  cloudOverlayEl.classList.remove("gathering");
+  void cloudOverlayEl.offsetWidth;
+  cloudOverlayEl.classList.add("scattering");
+  setTimeout(() => {
+    cloudOverlayEl.classList.remove("scattering");
+    cloudOverlayEl.classList.add("hidden");
+  }, 480);
 }
 
 async function loadCityImage(name, admin1) {
